@@ -28,7 +28,7 @@ if ($result->count() > 0) {
             'gitlab_project_id' => $selectedProject
         ]
     );
-} 
+}
 
 if (class_exists('PluginGitlabIntegrationParameters')) {
     $usersIds = explode(',', $usersIds);
@@ -45,14 +45,12 @@ if (class_exists('PluginGitlabIntegrationParameters')) {
     }
     fclose($fp);
     $title = $ticketId . ' - ' . $ticketName;
-    //$description = str_replace('&lt;p&gt;', '', str_replace('&lt;/p&gt;', '', $ticketContent));
-    //$description = str_replace('&lt;br&gt;', '<br>', $description);
-    //$description = str_replace('&lt;p style=\"padding-left: 40px;\"&gt;', '<p style="padding-left: 40px;">', $description);
     $description = "Содержимое заявки см. по ссылке: <a href='" . $_SERVER['HTTP_REFERER'] . "'>$title</a>";
-    $description .= "<br><br>$ticketContent";
+    $description .= "\n\n$ticketContent";
     $description = str_replace('&lt;', '<', $description);
     $description = str_replace('&gt;', '>', $description);
     $description = str_replace('\"', '"', $description);
+    $description = str_replace('<br>', "\n", $description);
     $fp = fopen("/tmp/issue.log", 'w');
 
     fputs($fp, "selectedProject=$selectedProject title=$title, description=$description");

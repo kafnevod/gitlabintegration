@@ -50,35 +50,35 @@ class PluginGitlabIntegrationGitlabIntegration {
 
         $iid = self::getIidIssue($selectedProject, $parameters, $headers);
         $query = array(
-            'id'          => $selectedProject, 
+            'id'          => $selectedProject,
             'iid'         => $iid,
 	    'title'       => $title,
 	    'labels'	  => "Активно",
 	    'description' => $description
             );
         if (count($usersGitlabIds) > 0) $query['assignee_id'] = intval($usersGitlabIds[0]);
-        $fp = fopen("/tmp/createIssue.log", 'w');
-        fputs($fp, json_encode($query));
-        fclose($fp);
-        //exit(0);	
+        // $fp = fopen("/tmp/createIssue.log", 'w');
+        // fputs($fp, json_encode($query));
+        // fclose($fp);
+        //exit(0);
         try {
            $curl = curl_init();
            curl_setopt($curl, CURLOPT_URL, $url);
            curl_setopt($curl, CURLOPT_POST, 1);
-    
+
            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-            
+
            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    
+
            curl_setopt($curl, CURLOPT_POSTFIELDS, $query);
-    
+
            $result = curl_exec($curl);
-    
+
            curl_close($curl);
         } catch (Exception $e) {
             PluginGitlabIntegrationParameters::ErrorLog($e->getMessage());
         }
-    
+
         $logIssue = "[ISSUE CREATED: IID: " . $iid . " PROJECT ID: " . $selectedProject . " TITLE: \"" . $title . "\" DESCRIPTION: \"" . $description . "\"]";
         PluginGitlabIntegrationEventLog::CreatedIssueLog($logIssue);
     }
@@ -94,20 +94,20 @@ class PluginGitlabIntegrationGitlabIntegration {
         $parameters = PluginGitlabIntegrationParameters::getParameters();
 
         $url = $parameters['url'] . 'api/v4/projects?per_page=100&order_by=name';
-    
+
         $headers = array(
             'PRIVATE-TOKEN: ' . $parameters['token']
         );
-    
+
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
-    
+
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-        
+
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    
+
         $result = curl_exec($curl);
-    
+
         $result = json_decode($result);
 
         curl_close($curl);
@@ -128,21 +128,21 @@ class PluginGitlabIntegrationGitlabIntegration {
         try {
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $url);
-    
+
             curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-            
+
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    
+
             $result = curl_exec($curl);
-    
+
             $result = json_decode($result);
-    
+
             if ($result) {
                 $iid = $result[0]->iid + 1;
             } else {
                 $iid = 1;
             }
-    
+
             curl_close($curl);
         } catch (Exception $e) {
             PluginGitlabIntegrationParameters::ErrorLog($e->getMessage());
