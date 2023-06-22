@@ -8,7 +8,7 @@ function createIssue(ticketId, dropdown, selectedProject, ticketName, ticketCont
   ticketContent = ticketContent.replace(new RegExp("<em>", "g"), "*");
   ticketContent = ticketContent.replace(new RegExp("</em>", "g"), "*");
 
-  if (ticketContent.indexOf("<ul>")) {
+  if (ticketContent.indexOf("<ul>") >= 0) {
     let lista = ticketContent.substring(ticketContent.indexOf("<ul>"), ticketContent.indexOf("</ul>") + 5);
     let newLista = lista.replace(new RegExp("<li>", "g"), "* ");
     newLista = newLista.replace(new RegExp("</li>", "g"), "<br>");
@@ -18,7 +18,7 @@ function createIssue(ticketId, dropdown, selectedProject, ticketName, ticketCont
   ticketContent = ticketContent.replace(new RegExp("<ul>", "g"), "");
   ticketContent = ticketContent.replace(new RegExp("</ul>", "g"), "<br>");
 
-  if (ticketContent.indexOf("<ol>")) {
+  if (ticketContent.indexOf("<ol>") >= 0) {
     let lista = ticketContent.substring(ticketContent.indexOf("<ol>"), ticketContent.indexOf("</ol>") + 5);
 
     let pos = 0;
@@ -55,7 +55,18 @@ function createIssue(ticketId, dropdown, selectedProject, ticketName, ticketCont
   if (selectedProject == newSelectedProject) {
     creatAgain = confirm($message);
   }
-
+  //creatAgain=false;
+  let tableformtableS = document.getElementById("mainformtable5");
+  let usersNodes = tableformtableS.childNodes[3].childNodes[1].querySelectorAll('a[href^="/front/user.form.php"');
+  let usersIds=[];
+  for (let userNode of usersNodes) {
+    let href = userNode.getAttribute('href');
+    let userId = href.substr(24); 
+    usersIds.push(userId);
+  }
+  usersIds = usersIds.toString();
+  //alert(usersIds);
+	
   if (creatAgain) {
     jQuery.ajax({
       type: "POST",
@@ -64,7 +75,8 @@ function createIssue(ticketId, dropdown, selectedProject, ticketName, ticketCont
         selectedProject: newSelectedProject,
         ticketId: ticketId,
         ticketName: ticketName,
-        ticketContent: ticketContent
+        ticketContent: ticketContent,
+	usersIds: usersIds
       }
     })
       .success(function () {
