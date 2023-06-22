@@ -131,6 +131,24 @@ class PluginGitlabIntegrationItemForm {
       return $canCreate;
    }
 
+  /**
+   * Return list of supported gitlabProjects
+   *
+   * @param empty
+   *
+   * @return Array Of gitlabProjects
+   */
+
+   static function listOfGitlabProjects() {
+     $ret=[];
+     $fp = fopen(GLPI_ROOT . "/plugins/gitlabintegration/gitlabProjects.txt", "r");
+     while ($str=fgets($fp)) {
+       if (strlen(trim($str)) == 0) continue;
+       $ret[] = trim($str);
+     } 
+     return $ret;
+   } 
+
    /**
     * Display contents at the component of item forms.
     *
@@ -145,7 +163,7 @@ class PluginGitlabIntegrationItemForm {
          'showtype' => 'normal',
          'display'  => true,
       ];
-   
+      $listOfGitlabProjects = self::listOfGitlabProjects();
       if (is_array($options) && count($options)) {
          foreach ($options as $key => $val) {
             $p[$key] = $val;
@@ -155,11 +173,11 @@ class PluginGitlabIntegrationItemForm {
       $values = []; 
 
       $result = PluginGitlabIntegrationGitlabIntegration::getProjects();
-   
       foreach ($result as $key => $value) {
-         $values[$value->id] = $value->name_with_namespace;
+	 if (in_array($value->path_with_namespace, $listOfGitlabProjects)) { 
+           $values[$value->id] = $value->name_with_namespace;
+	 }
       }
-   
       return Dropdown::showFromArray($p['name'], $values, $p);
    }
 }
