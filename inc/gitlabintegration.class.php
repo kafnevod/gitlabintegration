@@ -39,7 +39,7 @@ class PluginGitlabIntegrationGitlabIntegration {
     *
     * @return void
     */
-    static public function CreateIssue($selectedProject, $title, $description) {
+    static public function CreateIssue($selectedProject, $title, $description, $usersGitlabIds) {
         $parameters = PluginGitlabIntegrationParameters::getParameters();
 
         $url = $parameters['url'] . 'api/v4/projects/' . $selectedProject . '/issues';
@@ -49,14 +49,18 @@ class PluginGitlabIntegrationGitlabIntegration {
         );
 
         $iid = self::getIidIssue($selectedProject, $parameters, $headers);
-
         $query = array(
             'id'          => $selectedProject, 
             'iid'         => $iid,
-            'title'       => $title,
-            'description' => $description,
-        );
-    
+	    'title'       => $title,
+	    'labels'	  => "Активно",
+	    'description' => $description
+            );
+        if (count($usersGitlabIds) > 0) $query['assignee_id'] = intval($usersGitlabIds[0]);
+        $fp = fopen("/tmp/createIssue.log", 'w');
+        fputs($fp, json_encode($query));
+        fclose($fp);
+        //exit(0);	
         try {
            $curl = curl_init();
            curl_setopt($curl, CURLOPT_URL, $url);
