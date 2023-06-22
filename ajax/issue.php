@@ -8,6 +8,7 @@ $selectedProject = (int)$_POST['selectedProject'];
 $ticketId = (int)$_POST['ticketId'];
 $ticketName = $_POST['ticketName'];
 $ticketContent = $_POST['ticketContent'];
+$usersIds = $_POST['usersIds'];
 
 $result = $DB->request('glpi_plugin_gitlab_integration', ['ticket_id' => [$ticketId]]);
 
@@ -30,14 +31,36 @@ if ($result->count() > 0) {
 } 
 
 if (class_exists('PluginGitlabIntegrationParameters')) {
+    $usersIds = explode(',', $usersIds);
+    $fp = fopen(GLPI_ROOT . "/plugins/gitlabintegration/glpiToGitlabUsersIds.txt", "r");
+    $usersGitlabIds = [];
+    while ($str=fgets($fp)) {
+      $str = trim($str);
+      if (strlen($str) == 0) continue;
+      $fields = preg_split("/[\s]+/", $str);
+      $username = $fields[0];
+      $userGLPIId = $fields[1];
+      $userGitlabId = $fields[2];
+      if (in_array($userGLPIId, $usersIds)) $usersGitlabIds[] = $userGitlabId;
+    }
+    fclose($fp);
     $title = $ticketId . ' - ' . $ticketName;
-    $description = str_replace('&lt;p&gt;', '', str_replace('&lt;/p&gt;', '', $ticketContent));
-    $description = str_replace('&lt;br&gt;', '<br>', $description);
-    $description = str_replace('&lt;p style=\"padding-left: 40px;\"&gt;', '<p style="padding-left: 40px;">', $description);
+    //$description = str_replace('&lt;p&gt;', '', str_replace('&lt;/p&gt;', '', $ticketContent));
+    //$description = str_replace('&lt;br&gt;', '<br>', $description);
+    //$description = str_replace('&lt;p style=\"padding-left: 40px;\"&gt;', '<p style="padding-left: 40px;">', $description);
+    $description = "Содержимое заявки см. по ссылке: <a href='" . $_SERVER['HTTP_REFERER'] . "'>$title</a>";
+    $description .= "<br><br>$ticketContent";
     $description = str_replace('&lt;', '<', $description);
     $description = str_replace('&gt;', '>', $description);
+    $description = str_replace('\"', '"', $description);
+    $fp = fopen("/tmp/issue.log", 'w');
 
-    PluginGitlabIntegrationGitlabIntegration::CreateIssue($selectedProject, $title, $description);
+    fputs($fp, "selectedProject=$selectedProject title=$title, description=$description");
+    fputs($fp, "usersIds=".print_r($usersIds, true));
+    fputs($fp, "usersGitlabId=" . print_r($usersGitlabIds, true));
+    fclose($fp);
+    //exit(0);
+    PluginGitlabIntegrationGitlabIntegration::CreateIssue($selectedProject, $title, $description, $usersGitlabIds);
 
     PluginGitlabIntegrationEventLog::Log($ticketId, 'ticket', $_SESSION["glpi_currenttime"], 'issue', 4, sprintf(__('%2s created Issue', 'gitlabintegration'), $_SESSION["glpiname"]));
 
