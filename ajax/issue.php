@@ -51,12 +51,13 @@ if (class_exists('PluginGitlabIntegrationParameters')) {
     $description = str_replace('&gt;', '>', $description);
     $description = str_replace('\"', '"', $description);
     $description = str_replace('<br>', "\n", $description);
-    $fp = fopen("/tmp/issue.log", 'w');
-
-    fputs($fp, "selectedProject=$selectedProject title=$title, description=$description");
-    fputs($fp, "usersIds=".print_r($usersIds, true));
-    fputs($fp, "usersGitlabId=" . print_r($usersGitlabIds, true));
-    fclose($fp);
+    $description = str_replace('<br />', "\n", $description);
+    // $fp = fopen("/tmp/issue.log", 'w');
+    //
+    // fputs($fp, "selectedProject=$selectedProject title=$title, description=$description");
+    // fputs($fp, "usersIds=".print_r($usersIds, true));
+    // fputs($fp, "usersGitlabId=" . print_r($usersGitlabIds, true));
+    // fclose($fp);
     //exit(0);
     PluginGitlabIntegrationGitlabIntegration::CreateIssue($selectedProject, $title, $description, $usersGitlabIds);
 

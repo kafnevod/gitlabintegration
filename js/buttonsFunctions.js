@@ -1,6 +1,6 @@
 function createIssue(ticketId, dropdown, selectedProject, ticketName, ticketContent, $message) {
-  ticketContent = ticketContent.replace(new RegExp("<p>", 'g'), "");
-  ticketContent = ticketContent.replace(new RegExp("</p>", 'g'), "<br>");
+  ticketContent = ticketContent.replace(new RegExp("<p>", 'g'), "<br>");
+  ticketContent = ticketContent.replace(new RegExp("</p>", 'g'), "");
 
   ticketContent = ticketContent.replace(new RegExp("<strong>", "g"), "**");
   ticketContent = ticketContent.replace(new RegExp("</strong>", "g"), "**");
@@ -10,7 +10,7 @@ function createIssue(ticketId, dropdown, selectedProject, ticketName, ticketCont
 
   if (ticketContent.indexOf("<ul>") >= 0) {
     let lista = ticketContent.substring(ticketContent.indexOf("<ul>"), ticketContent.indexOf("</ul>") + 5);
-    let newLista = lista.replace(new RegExp("<li>", "g"), "* ");
+    let newLista = lista.replace(new RegExp("<li>", "g"), "<br>* ");
     newLista = newLista.replace(new RegExp("</li>", "g"), "<br>");
     ticketContent = ticketContent.replace(new RegExp(lista, "g"), newLista);
   }
@@ -61,12 +61,12 @@ function createIssue(ticketId, dropdown, selectedProject, ticketName, ticketCont
   let usersIds=[];
   for (let userNode of usersNodes) {
     let href = userNode.getAttribute('href');
-    let userId = href.substr(24); 
+    let userId = href.substr(24);
     usersIds.push(userId);
   }
   usersIds = usersIds.toString();
   //alert(usersIds);
-	
+
   if (creatAgain) {
     jQuery.ajax({
       type: "POST",
